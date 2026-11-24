@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bright Berry</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Big+Shoulders+Display:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/app.css">
+</head>
+<body>
+  <div class="bench">
+    <header class="top">
+      <h1>Bright Berry</h1>
+      <div class="rail-controls">
+        <label class="bright">
+          <span>Bright</span>
+          <input id="brightness" type="range" min="5" max="255" value="48">
+          <output id="brightness-out">48</output>
+        </label>
+        <button id="scan" class="ghost" type="button">Scan</button>
+      </div>
+    </header>
+
+    <section class="housing" aria-label="Sign preview">
+      <div class="bezel">
+        <div class="screw"></div>
+        <canvas id="left-sign" width="576" height="96" aria-label="Left panel"></canvas>
+        <div class="seam" aria-hidden="true"></div>
+        <canvas id="right-sign" width="576" height="96" aria-label="Right panel"></canvas>
+        <div class="screw"></div>
+      </div>
+      <div class="plates">
+        <span id="left-plate">Left</span>
+        <span id="now-playing" class="now"></span>
+        <span id="right-plate">Right</span>
+      </div>
+      <p id="status" class="status" role="status"></p>
+    </section>
+
+    <section id="kiosk-board" class="kiosk-board" hidden>
+      <p id="kiosk-place" class="kiosk-place">Weather</p>
+      <p id="kiosk-temp" class="kiosk-temp">--</p>
+      <p id="kiosk-detail" class="kiosk-detail"></p>
+    </section>
+
+    <section class="ticket">
+      <div class="modes" role="tablist">
+        <button type="button" class="mode is-on" data-mode="text" role="tab" aria-selected="true">Text</button>
+        <button type="button" class="mode" data-mode="image" role="tab" aria-selected="false">Picture</button>
+        <button type="button" class="mode" data-mode="weather" role="tab" aria-selected="false">Weather</button>
+      </div>
+
+      <form id="text-form" class="sheet">
+        <label class="grow">
+          Message
+          <input id="message" name="text" maxlength="180" placeholder="Tonight's special" autocomplete="off">
+        </label>
+        <label>
+          Speed
+          <input id="speed" type="range" min="1" max="10" value="4">
+        </label>
+        <div id="words" class="words"></div>
+        <div id="inks" class="swatches" role="group" aria-label="Letter colors">
+          <button type="button" class="swatch is-on" data-color="#d6ff4a" style="--swatch:#d6ff4a" aria-label="Phosphor"></button>
+          <button type="button" class="swatch" data-color="#ff4b3e" style="--swatch:#ff4b3e" aria-label="Red"></button>
+          <button type="button" class="swatch" data-color="#ffb020" style="--swatch:#ffb020" aria-label="Amber"></button>
+          <button type="button" class="swatch" data-color="#fff4d6" style="--swatch:#fff4d6" aria-label="White"></button>
+          <button type="button" class="swatch" data-color="#6ec8ff" style="--swatch:#6ec8ff" aria-label="Ice"></button>
+          <button type="button" class="swatch" data-color="#c792ff" style="--swatch:#c792ff" aria-label="Violet"></button>
+          <button type="button" class="swatch" data-color="#3ee6a4" style="--swatch:#3ee6a4" aria-label="Mint"></button>
+        </div>
+        <div id="grounds" class="swatches grounds" role="group" aria-label="Background">
+          <button type="button" class="swatch is-on" data-color="#000000" style="--swatch:#000000" aria-label="Black"></button>
+          <button type="button" class="swatch" data-color="#1a120c" style="--swatch:#1a120c" aria-label="Brown"></button>
+          <button type="button" class="swatch" data-color="#101820" style="--swatch:#101820" aria-label="Navy"></button>
+        </div>
+        <button type="submit" class="send">Add</button>
+      </form>
+
+      <form id="image-form" class="sheet is-hidden">
+        <label class="grow">
+          File
+          <input id="picture" type="file" accept="image/*,.gif,.png,.jpg,.webp">
+        </label>
+        <label>
+          Fit
+          <select id="fit">
+            <option value="letterbox">Letterbox</option>
+            <option value="cover">Cover</option>
+            <option value="stretch">Stretch</option>
+          </select>
+        </label>
+        <button type="submit" class="send">Add</button>
+      </form>
+
+      <form id="weather-form" class="sheet is-hidden">
+        <label class="grow">
+          City
+          <input id="city" name="city" placeholder="San Antonio" autocomplete="off">
+        </label>
+        <label>
+          Units
+          <select id="units">
+            <option value="fahrenheit">°F</option>
+            <option value="celsius">°C</option>
+          </select>
+        </label>
+        <label>
+          Refresh
+          <select id="refresh">
+            <option value="60">1 min</option>
+            <option value="300">5 min</option>
+            <option value="600">10 min</option>
+          </select>
+        </label>
+        <button type="submit" class="send">Save</button>
+        <div id="places" class="places" hidden></div>
+        <p class="run">A DHT11 on GPIO 4 supplies the temperature and humidity. Those two readings pick the icon.</p>
+        <p id="sky" class="sky"></p>
+      </form>
+
+      <div class="library">
+        <ul id="library-list"></ul>
+      </div>
+      <details class="pad">
+        <summary>Pad <span id="pad-status"></span></summary>
+        <form id="keypad-form" class="keypad">
+          <div id="keypad-rows"></div>
+          <button type="submit" class="send">Save</button>
+        </form>
+      </details>
+    </section>
+
+    <dialog id="picker">
+      <form method="dialog">
+        <header>
+          <h2>Link</h2>
+          <button value="cancel" class="ghost" type="submit">Close</button>
+        </header>
+        <div id="device-list" class="devices"></div>
+      </form>
+    </dialog>
+  </div>
+  <script src="/assets/app.js"></script>
+</body>
+</html>

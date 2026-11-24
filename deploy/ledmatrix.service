@@ -1,0 +1,18 @@
+[Unit]
+Description=Bright Berry LED matrix console
+After=bluetooth.target network-online.target
+Wants=bluetooth.target network-online.target
+
+[Service]
+Type=simple
+User=@USER@
+Group=@USER@
+SupplementaryGroups=bluetooth input
+WorkingDirectory=@ROOT@
+Environment=LEDMATRIX_ACTIVATE=1
+ExecStart=@ROOT@/.venv/bin/python -m app
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,9 @@
+fastapi>=0.115
+uvicorn>=0.32
+bleak>=0.22
+pillow>=10.4
+python-multipart>=0.0.12
+pynput>=1.7.6; platform_system == "Windows"
+evdev>=1.7.0; platform_system == "Linux"
+adafruit-circuitpython-dht>=1.4.6; platform_system == "Linux"
+adafruit-blinka>=8.46.0; platform_system == "Linux"
