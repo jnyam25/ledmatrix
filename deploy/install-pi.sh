@@ -8,6 +8,7 @@ if [[ "${EUID}" -ne 0 ]]; then
 fi
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+sed -i 's/\r$//' "$ROOT/deploy/ledmatrix.service"
 OWNER="${SUDO_USER:-pi}"
 HOME_DIR="$(getent passwd "$OWNER" | cut -d: -f6)"
 BROWSER="$(command -v chromium || command -v chromium-browser || true)"
