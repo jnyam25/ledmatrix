@@ -14,7 +14,11 @@ HOME_DIR="$(getent passwd "$OWNER" | cut -d: -f6)"
 BROWSER="$(command -v chromium || command -v chromium-browser || true)"
 
 apt-get update
-apt-get install -y python3-venv python3-pip python3-dev bluetooth bluez libgpiod2 python3-libgpiod
+LIBGPIOD_PACKAGE="libgpiod3"
+if apt-cache show libgpiod2 >/dev/null 2>&1; then
+  LIBGPIOD_PACKAGE="libgpiod2"
+fi
+apt-get install -y python3-venv python3-pip python3-dev bluetooth bluez "$LIBGPIOD_PACKAGE" python3-libgpiod
 if [[ -z "$BROWSER" ]]; then
   apt-get install -y chromium || apt-get install -y chromium-browser
   BROWSER="$(command -v chromium || command -v chromium-browser)"
@@ -51,7 +55,8 @@ Exec=$KIOSK
 X-GNOME-Autostart-enabled=true
 EOF
 
-chown -R "$OWNER:$OWNER" "$HOME_DIR/.config/labwc" "$HOME_DIR/.config/autostart" "$ROOT/data" || true
+mkdir -p "$ROOT/data"
+chown -R "$OWNER:$OWNER" "$HOME_DIR/.config/labwc" "$HOME_DIR/.config/autostart" "$ROOT/data"
 echo "Bright Berry will start at boot and open the dashboard full screen."
 echo "Plug the USB number pad into the Pi. Saved keys work with no monitor."
 echo "Wire the DHT11 data pin to GPIO 4, power to 3.3V, and ground to ground."

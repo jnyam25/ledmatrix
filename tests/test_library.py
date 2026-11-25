@@ -1,6 +1,8 @@
+from datetime import datetime, timezone
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from app.library import Library, build_rotation, dwell_seconds, greeting_for, with_live_greeting
 
@@ -55,6 +57,21 @@ class LibraryTests(unittest.TestCase):
         )
         self.assertEqual(shown[0]["text"], "GOOD AFTERNOON")
         self.assertEqual(shown[1]["text"], "HELLO GOOD DAY")
+
+    def test_live_greeting_uses_configured_timezone(self):
+        instant = datetime(2026, 11, 25, 16, 30, tzinfo=timezone.utc)
+
+        def fixed_now(zone=None):
+            return instant.astimezone(zone) if zone else instant.replace(tzinfo=None)
+
+        with patch("app.library.datetime") as clock:
+            clock.now.side_effect = fixed_now
+            shown = with_live_greeting(
+                [{"id": "greeting", "kind": "greeting", "text": "GOOD AFTERNOON"}],
+                timezone="America/Chicago",
+            )
+
+        self.assertEqual(shown[0]["text"], "GOOD MORNING")
 
     def test_dwell_covers_one_scroll_pass(self):
         self.assertEqual(dwell_seconds("text", 10, 100, 12), 12)

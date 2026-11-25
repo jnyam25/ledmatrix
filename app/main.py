@@ -115,7 +115,9 @@ async def brightness(body: dict = Body(...)) -> dict:
 
 @app.get("/api/library")
 async def library_list() -> dict:
-    saved = _hub(app).library.snapshot()
+    hub = _hub(app)
+    timezone = (hub.config.get("weather") or {}).get("timezone") or "auto"
+    saved = hub.library.snapshot(timezone)
     saved["now"] = _hub(app).now_playing
     return saved
 
@@ -132,7 +134,9 @@ async def library_text(body: dict = Body(...)) -> dict:
         )
     except ValueError as exc:
         raise HTTPException(400, str(exc)) from exc
-    saved = _hub(app).library.snapshot()
+    hub = _hub(app)
+    timezone = (hub.config.get("weather") or {}).get("timezone") or "auto"
+    saved = hub.library.snapshot(timezone)
     saved["now"] = _hub(app).now_playing
     return saved
 
@@ -144,7 +148,9 @@ async def library_image(file: UploadFile = File(...), mode: str = Form("letterbo
         _hub(app).library.add_image(file.filename or "image.png", raw, mode)
     except ValueError as exc:
         raise HTTPException(400, str(exc)) from exc
-    saved = _hub(app).library.snapshot()
+    hub = _hub(app)
+    timezone = (hub.config.get("weather") or {}).get("timezone") or "auto"
+    saved = hub.library.snapshot(timezone)
     saved["now"] = _hub(app).now_playing
     return saved
 
@@ -154,7 +160,9 @@ async def library_remove(kind: str, item_id: str) -> dict:
     if kind not in {"text", "image"}:
         raise HTTPException(400, "Choose a text or a picture")
     _hub(app).library.remove(kind, item_id)
-    saved = _hub(app).library.snapshot()
+    hub = _hub(app)
+    timezone = (hub.config.get("weather") or {}).get("timezone") or "auto"
+    saved = hub.library.snapshot(timezone)
     saved["now"] = _hub(app).now_playing
     return saved
 
