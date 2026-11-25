@@ -7,6 +7,7 @@ import re
 import uuid
 from datetime import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 _HEX = re.compile(r"^#[0-9A-Fa-f]{6}$")
 
@@ -39,8 +40,17 @@ def greeting_for(hour: int) -> tuple[str, list[dict]]:
     return f"GOOD {part}", runs
 
 
-def with_live_greeting(texts: list[dict], hour: int | None = None) -> list[dict]:
-    clock_hour = datetime.now().hour if hour is None else hour
+def with_live_greeting(texts: list[dict], hour: int | None = None, timezone: str | None = None) -> list[dict]:
+    if hour is not None:
+        clock_hour = hour
+    else:
+        zone = None
+        if timezone and timezone != "auto":
+            try:
+                zone = ZoneInfo(timezone)
+            except Exception:
+                zone = None
+        clock_hour = datetime.now(zone).hour
     message, runs = greeting_for(clock_hour)
     live: list[dict] = []
     for item in texts:
@@ -154,10 +164,10 @@ class Library:
         data["greeting_seeded"] = True
         self._write(data)
 
-    def snapshot(self) -> dict:
+    def snapshot(self, timezone: str | None = None) -> dict:
         data = self._read()
         return {
-            "texts": with_live_greeting(list(data["texts"])),
+            "texts": with_live_greeting(list(data["texts"]), timezone=timezone),
             "images": [
                 {"id": item["id"], "name": item["name"], "mode": item.get("mode") or "letterbox"}
                 for item in data["images"]

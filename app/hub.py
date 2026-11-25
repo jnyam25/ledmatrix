@@ -200,7 +200,8 @@ class Hub:
             self.message = "Paused." if self.paused else "Playing."
             return self.status()
         if action == "item":
-            slots = library_slots(self.library.snapshot())
+            timezone = (self.config.get("weather") or {}).get("timezone") or "auto"
+            slots = library_slots(self.library.snapshot(timezone))
             slot = int(binding.get("slot") or 0)
             if slot < 1 or slot > len(slots):
                 self.message = f"Library slot {slot} is empty."
@@ -223,12 +224,14 @@ class Hub:
         return self.status()
 
     def _rotation(self) -> list[tuple[str, dict | None]]:
-        saved = self.library.snapshot()
+        timezone = (self.config.get("weather") or {}).get("timezone") or "auto"
+        saved = self.library.snapshot(timezone)
         weather = self.config.get("weather") or {}
         return build_rotation(saved["texts"], saved["images"], weather.get("latitude") is not None)
 
     async def _play_library_item(self, kind: str, item: dict | None) -> float:
-        hold = self.library.snapshot()["hold_seconds"]
+        timezone = (self.config.get("weather") or {}).get("timezone") or "auto"
+        hold = self.library.snapshot(timezone)["hold_seconds"]
         if kind == "text" and item is not None:
             await self.show_text(
                 item["text"], item["color"], item["background"], item["speed"], "span", item.get("runs")
@@ -482,7 +485,7 @@ class Hub:
             "message": self.message,
             "playlist": {
                 "now": self.now_playing,
-                "hold_seconds": self.library.snapshot()["hold_seconds"],
+                "hold_seconds": self.library.snapshot(weather.get("timezone") or "auto")["hold_seconds"],
                 "paused": self.paused,
             },
             "keypad": {

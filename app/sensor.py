@@ -54,13 +54,20 @@ def read_local_air(pin: int | None, units: str, timezone: str) -> dict | None:
 
 
 def _clock(timezone: str) -> str:
+    return format_clock(datetime.now(_zone(timezone)))
+
+
+def _zone(timezone: str):
     zone = None
     if timezone and timezone != "auto":
         try:
             zone = ZoneInfo(timezone)
         except Exception:
             zone = None
-    moment = datetime.now(zone) if zone else datetime.now()
+    return zone
+
+
+def format_clock(moment: datetime) -> str:
     hour = moment.hour % 12 or 12
     return f"{hour}:{moment.minute:02d}"
 

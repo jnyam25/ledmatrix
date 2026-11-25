@@ -7,6 +7,8 @@ from datetime import datetime
 from urllib.parse import urlencode
 from urllib.request import urlopen
 
+from app.sensor import _zone, format_clock
+
 GEOCODE = "https://geocoding-api.open-meteo.com/v1/search"
 FORECAST = "https://api.open-meteo.com/v1/forecast"
 
@@ -60,14 +62,7 @@ def current_weather(latitude: float, longitude: float, units: str, timezone: str
     highs = daily.get("temperature_2m_max") or [current.get("temperature_2m", 0)]
     lows = daily.get("temperature_2m_min") or [current.get("temperature_2m", 0)]
     stamp = current.get("time") or ""
-    clock = ""
-    if stamp:
-        try:
-            moment = datetime.fromisoformat(stamp)
-            hour = moment.hour % 12 or 12
-            clock = f"{hour}:{moment.minute:02d}"
-        except ValueError:
-            clock = ""
+    clock = format_clock(datetime.now(_zone(timezone)))
     return {
         "temperature": current.get("temperature_2m", 0),
         "code": int(current.get("weather_code") or 0),
